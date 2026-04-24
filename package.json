@@ -1,0 +1,11 @@
+{
+  "name": "family-edu-butler",
+  "private": true,
+  "scripts": {
+    "dev:server": "npm run dev --prefix server",
+    "dev:web": "npm run dev --prefix web",
+    "install:all": "npm install --prefix server && npm install --prefix web",
+    "build": "npm run build --prefix server && npm run build --prefix web",
+    "seed": "npm run db:seed --prefix server"
+  }
+}
