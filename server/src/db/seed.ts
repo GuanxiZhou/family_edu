@@ -1,8 +1,6 @@
-import { runMigrations } from "./migrate.js";
 import { db } from "../lib/db.js";
 import { children, families, goals, growthLogs, tasks } from "./schema.js";
 
-runMigrations();
 
 const [family] = await db
   .insert(families)
