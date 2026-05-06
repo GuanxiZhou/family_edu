@@ -1,10 +1,8 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { ZodError } from "zod";
-import { runMigrations } from "./db/migrate.js";
 import { registerRoutes } from "./routes/register.js";
 
-runMigrations();
 
 const app = Fastify({ logger: true });
 await app.register(cors, {
