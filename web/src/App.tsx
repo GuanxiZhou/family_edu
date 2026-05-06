@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { FAMILY_KEY } from "./api";
 import { SiteHeader } from "./components/SiteHeader";
