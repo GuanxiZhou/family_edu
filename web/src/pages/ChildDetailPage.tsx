@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet, apiSend, FAMILY_KEY } from "../api";
-import { currentWeekRangeLocal, localDateKey } from "../lib/db";
+import { currentWeekRangeLocal, localDateKey } from "../lib/dataRange";
 
 type Goal = { goalId: string; title: string; type: string; deadline: string; progress: number };
 type Task = {

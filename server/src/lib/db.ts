@@ -1,16 +1,23 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import * as schema from "../db/schema.js";
-import path from "node:path";
-import fs from "node:fs";
+export function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
-const dataDir = path.join(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+export function addDaysYmd(ymd: string, deltaDays: number): string {
+  const d = new Date(`${ymd}T12:00:00`);
+  d.setDate(d.getDate() + deltaDays);
+  return localDateKey(d);
+}
 
-const dbPath = process.env.DATABASE_URL ?? path.join(dataDir, "app.db");
-const sqlite: InstanceType<typeof Database> = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-
-export const db = drizzle(sqlite, { schema });
-export const rawDb: InstanceType<typeof Database> = sqlite;
+/** 本周（周一至周日）本地日历 [start,end] */
+export function currentWeekRangeLocal(): { start: string; end: string } {
+  const now = new Date();
+  const todayYmd = localDateKey(now);
+  const dow = now.getDay();
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const mondayYmd = addDaysYmd(todayYmd, mondayOffset);
+  const sundayYmd = addDaysYmd(mondayYmd, 6);
+  return { start: mondayYmd, end: sundayYmd };
+}
