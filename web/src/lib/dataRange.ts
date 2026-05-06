@@ -1,18 +1,23 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "../db/schema.js";
-
-const { Pool } = pg;
-
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is required");
+export function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+export function currentWeekRangeLocal(date = new Date()) {
+  const current = new Date(date);
+  const day = current.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
 
-export const db = drizzle(pool, { schema });
+  const start = new Date(current);
+  start.setDate(current.getDate() + diffToMonday);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  return {
+    start: localDateKey(start),
+    end: localDateKey(end),
+  };
+}
