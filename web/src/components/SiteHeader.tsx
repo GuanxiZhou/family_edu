@@ -1,9 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FAMILY_KEY } from "../api";
+import { useI18n } from "../i18n/i18n";
 
 export function SiteHeader() {
   const { pathname } = useLocation();
+  const { lang, toggleLang, t } = useI18n();
   const [familyId, setFamilyId] = useState<string | null>(() =>
     typeof localStorage !== "undefined" ? localStorage.getItem(FAMILY_KEY) : null,
   );
@@ -18,9 +20,9 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header-inner">
         <NavLink to="/" className="site-logo">
-          家庭教育管家
+          {t("app.name")}
         </NavLink>
-        <nav className="site-nav" aria-label="主导航">
+        <nav className="site-nav" aria-label="Primary navigation">
           <NavLink
             to="/"
             end
@@ -30,30 +32,39 @@ export function SiteHeader() {
               setFamilyId(null);
             }}
           >
-            主页
+            {t("nav.home")}
           </NavLink>
           {familyId && (
             <>
               <NavLink to="/workspace" className={({ isActive }) => (isActive ? "active" : "")}>
-                家庭
+                {t("nav.workspace")}
               </NavLink>
               <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
-                家庭看板
+                {t("nav.dashboard")}
               </NavLink>
               <NavLink to="/children" className={({ isActive }) => (isActive ? "active" : "")}>
-                孩子档案
+                {t("nav.children")}
               </NavLink>
             </>
           )}
           {isLanding && (
             <>
-              <a href="#features">功能亮点</a>
-              <a href="#testimonials">家长反馈</a>
+              <a href="#features">{t("nav.features")}</a>
+              <a href="#testimonials">{t("nav.testimonials")}</a>
               <NavLink to="/workspace" className="nav-anchor-cta">
-                开始使用
+                {t("nav.start")}
               </NavLink>
             </>
           )}
+          <button
+            type="button"
+            className="lang-toggle"
+            onClick={toggleLang}
+            aria-label="Toggle language"
+            title="Toggle language"
+          >
+            {lang === "zh" ? t("nav.lang.en") : t("nav.lang.zh")}
+          </button>
         </nav>
       </div>
     </header>

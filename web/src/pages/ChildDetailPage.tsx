@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet, apiSend, FAMILY_KEY } from "../api";
 import { currentWeekRangeLocal, localDateKey } from "../lib/dataRange";
+import { useI18n } from "../i18n/i18n";
 
 type Goal = { goalId: string; title: string; type: string; deadline: string; progress: number };
 type Task = {
@@ -31,6 +32,7 @@ type Risk = {
 
 export function ChildDetailPage() {
   const { childId } = useParams<{ childId: string }>();
+  const { t } = useI18n();
   const [profile, setProfile] = useState<ChildProfile | null>(null);
   const [profileForm, setProfileForm] = useState({
     name: "",
@@ -164,7 +166,11 @@ export function ChildDetailPage() {
           }
         : {
             type: logForm.type,
-            subject: logForm.subject || (logForm.type === "event" ? "重要事件" : "综合"),
+            subject:
+              logForm.subject ||
+              (logForm.type === "event"
+                ? t("childDetail.logs.defaultEventSubject")
+                : t("childDetail.logs.defaultGeneralSubject")),
             loggedAt: logForm.loggedAt,
             content: logForm.content,
           };
@@ -178,10 +184,10 @@ export function ChildDetailPage() {
     loadAll();
   };
 
-  const deleteTask = async (t: Task) => {
-    const ok = window.confirm(`确定删除任务「${t.title}」吗？此操作不可恢复。`);
+  const deleteTask = async (task: Task) => {
+    const ok = window.confirm(t("childDetail.tasks.confirmDelete", { title: task.title }));
     if (!ok) return;
-    await apiSend(`/api/tasks/${t.taskId}`, "DELETE");
+    await apiSend(`/api/tasks/${task.taskId}`, "DELETE");
     loadAll();
   };
 
@@ -202,79 +208,79 @@ export function ChildDetailPage() {
   return (
     <div>
       <Link className="back-link" to="/children">
-        ← 返回孩子列表
+        {t("childDetail.back")}
       </Link>
-      <h1 className="page-title">孩子工作台</h1>
-      <p className="page-lead">目标 → 任务 → 成长记录，形成完整执行与反馈闭环。</p>
+      <h1 className="page-title">{t("childDetail.title")}</h1>
+      <p className="page-lead">{t("childDetail.lead")}</p>
 
       <div className="card">
-        <h3>孩子档案</h3>
+        <h3>{t("childDetail.profileTitle")}</h3>
         <p className="muted" style={{ marginTop: "-0.25rem" }}>
-          管理对象是谁：基础信息、学校、科目与兴趣、家长备注。孩子轻量端：{" "}
+          {t("childDetail.profileLead")}{" "}
           <Link to={`/child-app/${childId}`} target="_blank" rel="noreferrer">
-            打开今日任务（孩子端）
+            {t("childDetail.childLink")}
           </Link>
         </p>
         <div className="form-row">
-          <label>姓名</label>
+          <label>{t("childDetail.profile.name")}</label>
           <input value={profileForm.name} onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>年级</label>
+          <label>{t("childDetail.profile.grade")}</label>
           <input value={profileForm.grade} onChange={(e) => setProfileForm((f) => ({ ...f, grade: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>学校</label>
+          <label>{t("childDetail.profile.school")}</label>
           <input value={profileForm.school} onChange={(e) => setProfileForm((f) => ({ ...f, school: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>科目（用逗号分隔）</label>
+          <label>{t("childDetail.profile.subjects")}</label>
           <input
             value={profileForm.subjectsText}
             onChange={(e) => setProfileForm((f) => ({ ...f, subjectsText: e.target.value }))}
-            placeholder="数学, 语文, 英语"
+            placeholder={t("childDetail.profile.subjectsPh")}
           />
         </div>
         <div className="form-row">
-          <label>兴趣（用逗号分隔）</label>
+          <label>{t("childDetail.profile.interests")}</label>
           <input
             value={profileForm.interestsText}
             onChange={(e) => setProfileForm((f) => ({ ...f, interestsText: e.target.value }))}
-            placeholder="钢琴, 游泳"
+            placeholder={t("childDetail.profile.interestsPh")}
           />
         </div>
         <div className="form-row">
-          <label>家长备注</label>
+          <label>{t("childDetail.profile.notes")}</label>
           <textarea rows={3} value={profileForm.parentNotes} onChange={(e) => setProfileForm((f) => ({ ...f, parentNotes: e.target.value }))} />
         </div>
         <button type="button" onClick={saveProfile} disabled={!profileForm.name || !profileForm.grade}>
-          保存档案
+          {t("childDetail.profile.save")}
         </button>
-        {!profile && <p className="muted">提示：若档案加载失败，请从「孩子档案」重新进入。</p>}
+        {!profile && <p className="muted">{t("childDetail.profile.hint")}</p>}
       </div>
 
       <div className="card">
-        <h3>长期目标</h3>
+        <h3>{t("childDetail.goalsTitle")}</h3>
         <div className="form-row">
-          <label>标题</label>
+          <label>{t("childDetail.goal.title")}</label>
           <input value={goalForm.title} onChange={(e) => setGoalForm((f) => ({ ...f, title: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>类型</label>
+          <label>{t("childDetail.goal.type")}</label>
           <select value={goalForm.type} onChange={(e) => setGoalForm((f) => ({ ...f, type: e.target.value }))}>
-            <option value="学期目标">学期目标</option>
-            <option value="年度目标">年度目标</option>
-            <option value="学科">学科</option>
-            <option value="兴趣">兴趣</option>
-            <option value="综合">综合</option>
+            <option value="学期目标">{t("childDetail.goal.preset.term")}</option>
+            <option value="年度目标">{t("childDetail.goal.preset.year")}</option>
+            <option value="学科">{t("childDetail.goal.preset.subject")}</option>
+            <option value="兴趣">{t("childDetail.goal.preset.interest")}</option>
+            <option value="综合">{t("childDetail.goal.preset.general")}</option>
           </select>
         </div>
         <div className="form-row">
-          <label>截止日期</label>
+          <label>{t("childDetail.goal.deadline")}</label>
           <input type="date" value={goalForm.deadline} onChange={(e) => setGoalForm((f) => ({ ...f, deadline: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>初始进度（0–100）</label>
+          <label>{t("childDetail.goal.progress0_100")}</label>
           <input
             type="number"
             min={0}
@@ -284,15 +290,15 @@ export function ChildDetailPage() {
           />
         </div>
         <button type="button" onClick={addGoal} disabled={!goalForm.title}>
-          添加目标
+          {t("childDetail.goal.add")}
         </button>
         <table style={{ marginTop: "1rem" }}>
           <thead>
             <tr>
-              <th>目标</th>
-              <th>进度</th>
-              <th>截止</th>
-              <th>AI 草稿任务</th>
+              <th>{t("childDetail.goal.table.goal")}</th>
+              <th>{t("childDetail.goal.table.progress")}</th>
+              <th>{t("childDetail.goal.table.deadline")}</th>
+              <th>{t("childDetail.goal.table.aiDraft")}</th>
             </tr>
           </thead>
           <tbody>
@@ -317,7 +323,7 @@ export function ChildDetailPage() {
                 <td>{g.deadline}</td>
                 <td>
                   <button type="button" className="secondary" onClick={() => draftFromGoal(g.goalId)}>
-                    生成并落库
+                    {t("childDetail.goal.aiApply")}
                   </button>
                 </td>
               </tr>
@@ -327,51 +333,51 @@ export function ChildDetailPage() {
       </div>
 
       <div className="card">
-        <h3>任务</h3>
+        <h3>{t("childDetail.tasksTitle")}</h3>
         <div className="form-row" style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-          <label style={{ margin: 0 }}>视图</label>
+          <label style={{ margin: 0 }}>{t("childDetail.tasks.view")}</label>
           <select value={taskView} onChange={(e) => setTaskView(e.target.value as "all" | "week")}>
-            <option value="all">全部</option>
-            <option value="week">本周（{weekRange.start} ~ {weekRange.end}）</option>
+            <option value="all">{t("childDetail.tasks.view.all")}</option>
+            <option value="week">{t("childDetail.tasks.view.week", { start: weekRange.start, end: weekRange.end })}</option>
           </select>
         </div>
         <div className="form-row">
-          <label>标题</label>
+          <label>{t("childDetail.tasks.title")}</label>
           <input value={taskForm.title} onChange={(e) => setTaskForm((f) => ({ ...f, title: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>日期</label>
+          <label>{t("childDetail.tasks.date")}</label>
           <input type="date" value={taskForm.dueDate} onChange={(e) => setTaskForm((f) => ({ ...f, dueDate: e.target.value }))} />
         </div>
         <button type="button" onClick={addTask} disabled={!taskForm.title}>
-          添加任务
+          {t("childDetail.tasks.add")}
         </button>
         <table style={{ marginTop: "1rem" }}>
           <thead>
             <tr>
-              <th>任务</th>
-              <th>日期</th>
-              <th>状态</th>
-              <th>来源</th>
-              <th>打卡</th>
+              <th>{t("childDetail.tasks.table.task")}</th>
+              <th>{t("childDetail.tasks.table.date")}</th>
+              <th>{t("childDetail.tasks.table.status")}</th>
+              <th>{t("childDetail.tasks.table.source")}</th>
+              <th>{t("childDetail.tasks.table.check")}</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {tasksShown.map((t) => (
-              <tr key={t.taskId}>
-                <td>{t.title}</td>
-                <td>{t.dueDate}</td>
-                <td>{t.status}</td>
-                <td>{t.source}</td>
+            {tasksShown.map((task) => (
+              <tr key={task.taskId}>
+                <td>{task.title}</td>
+                <td>{task.dueDate}</td>
+                <td>{task.status}</td>
+                <td>{task.source}</td>
                 <td>
-                  <button type="button" className="secondary" onClick={() => toggleTask(t)}>
-                    {t.status === "completed" ? "标为未完成" : "完成"}
+                  <button type="button" className="secondary" onClick={() => toggleTask(task)}>
+                    {task.status === "completed" ? t("childDetail.tasks.markUndone") : t("childDetail.tasks.done")}
                   </button>
                 </td>
                 <td>
-                  <button type="button" className="secondary" onClick={() => deleteTask(t)}>
-                    删除
+                  <button type="button" className="secondary" onClick={() => deleteTask(task)}>
+                    {t("childDetail.tasks.delete")}
                   </button>
                 </td>
               </tr>
@@ -381,45 +387,45 @@ export function ChildDetailPage() {
       </div>
 
       <div className="card">
-        <h3>成长记录</h3>
+        <h3>{t("childDetail.logsTitle")}</h3>
         <div className="form-row">
-          <label>类型</label>
+          <label>{t("childDetail.logs.type")}</label>
           <select value={logForm.type} onChange={(e) => setLogForm((f) => ({ ...f, type: e.target.value as typeof f.type }))}>
-            <option value="score">成绩</option>
-            <option value="feedback">老师反馈</option>
-            <option value="note">观察笔记</option>
-            <option value="event">重要事件（考试/比赛等）</option>
+            <option value="score">{t("childDetail.logs.type.score")}</option>
+            <option value="feedback">{t("childDetail.logs.type.feedback")}</option>
+            <option value="note">{t("childDetail.logs.type.note")}</option>
+            <option value="event">{t("childDetail.logs.type.event")}</option>
           </select>
         </div>
         <div className="form-row">
-          <label>{logForm.type === "event" ? "事件标题" : "科目"}</label>
+          <label>{logForm.type === "event" ? t("childDetail.logs.eventTitle") : t("childDetail.logs.subject")}</label>
           <input value={logForm.subject} onChange={(e) => setLogForm((f) => ({ ...f, subject: e.target.value }))} />
         </div>
         {logForm.type === "score" ? (
           <div className="form-row">
-            <label>分数</label>
+            <label>{t("childDetail.logs.score")}</label>
             <input value={logForm.score} onChange={(e) => setLogForm((f) => ({ ...f, score: e.target.value }))} />
           </div>
         ) : (
           <div className="form-row">
-            <label>{logForm.type === "event" ? "详情" : "内容"}</label>
+            <label>{logForm.type === "event" ? t("childDetail.logs.details") : t("childDetail.logs.content")}</label>
             <textarea rows={3} value={logForm.content} onChange={(e) => setLogForm((f) => ({ ...f, content: e.target.value }))} />
           </div>
         )}
         <div className="form-row">
-          <label>日期</label>
+          <label>{t("childDetail.logs.date")}</label>
           <input type="date" value={logForm.loggedAt} onChange={(e) => setLogForm((f) => ({ ...f, loggedAt: e.target.value }))} />
         </div>
         <button type="button" onClick={addLog}>
-          保存记录
+          {t("childDetail.logs.save")}
         </button>
         <table style={{ marginTop: "1rem" }}>
           <thead>
             <tr>
-              <th>类型</th>
-              <th>科目</th>
-              <th>内容/分数</th>
-              <th>日期</th>
+              <th>{t("childDetail.logs.table.type")}</th>
+              <th>{t("childDetail.logs.table.subject")}</th>
+              <th>{t("childDetail.logs.table.value")}</th>
+              <th>{t("childDetail.logs.table.date")}</th>
             </tr>
           </thead>
           <tbody>
@@ -427,7 +433,7 @@ export function ChildDetailPage() {
               <tr key={l.logId}>
                 <td>{l.type}</td>
                 <td>{l.subject}</td>
-                <td>{l.valueJson ?? l.content ?? "—"}</td>
+                <td>{l.valueJson ?? l.content ?? t("common.dash")}</td>
                 <td>{l.loggedAt}</td>
               </tr>
             ))}
@@ -436,23 +442,23 @@ export function ChildDetailPage() {
       </div>
 
       <div className="card">
-        <h3>风险提醒</h3>
+        <h3>{t("childDetail.risksTitle")}</h3>
         <p className="muted" style={{ marginTop: "-0.25rem" }}>
-          默认只显示<strong>待处理</strong>。处理后会在列表中消失；需要查看历史可打开开关。
+          {t("childDetail.risks.lead")}
         </p>
         <div className="form-row" style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
           <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", margin: 0 }}>
             <input type="checkbox" checked={showRiskHistory} onChange={(e) => setShowRiskHistory(e.target.checked)} />
-            显示已处理记录
+            {t("childDetail.risks.toggleHistory")}
           </label>
         </div>
         <table>
           <thead>
             <tr>
-              <th>等级</th>
-              <th>说明</th>
-              <th>规则</th>
-              <th>状态</th>
+              <th>{t("childDetail.risks.table.level")}</th>
+              <th>{t("childDetail.risks.table.detail")}</th>
+              <th>{t("childDetail.risks.table.rule")}</th>
+              <th>{t("childDetail.risks.table.status")}</th>
               <th />
             </tr>
           </thead>
@@ -460,7 +466,7 @@ export function ChildDetailPage() {
             {risks.length === 0 ? (
               <tr>
                 <td colSpan={5} className="muted">
-                  {showRiskHistory ? "暂无记录。" : "暂无待处理风险。"}
+                  {showRiskHistory ? t("childDetail.risks.empty.all") : t("childDetail.risks.empty.open")}
                 </td>
               </tr>
             ) : (
@@ -469,13 +475,13 @@ export function ChildDetailPage() {
                   <td>
                     <span className={`tag ${r.level}`}>{r.level}</span>
                   </td>
-                  <td>{r.detail ?? "—"}</td>
+                  <td>{r.detail ?? t("common.dash")}</td>
                   <td className="muted">{r.triggerRule}</td>
-                  <td className="muted">{r.resolvedAt ? "已处理" : "待处理"}</td>
+                  <td className="muted">{r.resolvedAt ? t("childDetail.risks.status.resolved") : t("childDetail.risks.status.open")}</td>
                   <td>
                     {!r.resolvedAt && (
                       <button type="button" className="secondary" onClick={() => resolveRisk(r.riskId)}>
-                        标记已处理
+                        {t("childDetail.risks.resolve")}
                       </button>
                     )}
                   </td>

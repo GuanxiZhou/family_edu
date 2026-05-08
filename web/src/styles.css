@@ -110,6 +110,21 @@ a {
   color: var(--brand);
 }
 
+.lang-toggle {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lang-toggle:hover {
+  border-color: rgba(29, 78, 216, 0.35);
+  color: var(--brand);
+}
+
 .nav-anchor-cta {
   background: var(--brand);
   color: #fff !important;
@@ -638,9 +653,17 @@ textarea:focus {
 
 /* —— 孩子轻量端 —— */
 .child-app {
+  position: relative;
   min-height: 100vh;
   background: radial-gradient(1200px 600px at 20% 0%, #eff6ff 0%, #f8fafc 45%, #f8fafc 100%);
   color: var(--ink);
+}
+
+.child-app-lang {
+  position: fixed;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 30;
 }
 
 .child-app-header {

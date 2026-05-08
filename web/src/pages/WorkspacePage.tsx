@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet, apiSend, FAMILY_KEY } from "../api";
+import { useI18n } from "../i18n/i18n";
 
 type FamilyRow = { familyId: string; name: string };
 
 export function WorkspacePage() {
   const nav = useNavigate();
+  const { t } = useI18n();
   const [list, setList] = useState<FamilyRow[]>([]);
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function WorkspacePage() {
   const create = async () => {
     setErr(null);
     try {
-      const { family } = await apiSend<{ family: FamilyRow }>("/api/families", "POST", { name: name || "我的家庭" });
+      const { family } = await apiSend<{ family: FamilyRow }>("/api/families", "POST", { name: name || t("workspace.defaultName") });
       setName("");
       choose(family.familyId);
     } catch (e) {
@@ -38,7 +40,7 @@ export function WorkspacePage() {
 
   const removeFamily = async (family: FamilyRow) => {
     setErr(null);
-    const ok = window.confirm(`确定删除家庭「${family.name}」吗？\n\n这会删除该家庭下的孩子、目标、任务、成长记录与风险提醒，且不可恢复。`);
+    const ok = window.confirm(t("workspace.confirmDelete", { name: family.name }));
     if (!ok) return;
     try {
       await apiSend(`/api/families/${family.familyId}`, "DELETE");
@@ -52,26 +54,26 @@ export function WorkspacePage() {
 
   return (
     <div>
-      <h1 className="page-title">创建/选择家庭</h1>
-      <p className="page-lead">这是你的家庭工作空间入口。选中后会进入「家庭看板」。</p>
+      <h1 className="page-title">{t("workspace.title")}</h1>
+      <p className="page-lead">{t("workspace.lead")}</p>
 
       {err && <p className="error">{err}</p>}
 
       <div className="grid2">
         <div className="card">
-          <h3>已有家庭</h3>
+          <h3>{t("workspace.existing")}</h3>
           {list.length === 0 ? (
-            <p className="muted">暂无家庭，可在右侧新建。</p>
+            <p className="muted">{t("workspace.none")}</p>
           ) : (
             <ul className="family-list">
               {list.map((f) => (
                 <li key={f.familyId}>
                   <div className="family-row">
                     <button type="button" className="btn btn-primary family-enter" onClick={() => choose(f.familyId)}>
-                      进入 {f.name}
+                      {t("workspace.enter")} {f.name}
                     </button>
                     <button type="button" className="btn btn-secondary family-delete" onClick={() => removeFamily(f)}>
-                      删除
+                      {t("workspace.delete")}
                     </button>
                   </div>
                 </li>
@@ -81,13 +83,13 @@ export function WorkspacePage() {
         </div>
 
         <div className="card">
-          <h3>新建家庭</h3>
+          <h3>{t("workspace.new")}</h3>
           <div className="form-row">
-            <label htmlFor="fname">家庭名称</label>
-            <input id="fname" value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：张家" />
+            <label htmlFor="fname">{t("workspace.familyName")}</label>
+            <input id="fname" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("workspace.familyNamePh")} />
           </div>
           <button type="button" className="btn btn-secondary" onClick={create}>
-            创建并进入看板
+            {t("workspace.createAndEnter")}
           </button>
         </div>
       </div>

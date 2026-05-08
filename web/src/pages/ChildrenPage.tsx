@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiGet, apiSend, FAMILY_KEY } from "../api";
+import { useI18n } from "../i18n/i18n";
 
 type Child = {
   childId: string;
@@ -10,6 +11,7 @@ type Child = {
 };
 
 export function ChildrenPage() {
+  const { t } = useI18n();
   const familyId = localStorage.getItem(FAMILY_KEY)!;
   const [children, setChildren] = useState<Child[]>([]);
   const [form, setForm] = useState({ name: "", grade: "" });
@@ -52,31 +54,31 @@ export function ChildrenPage() {
 
   return (
     <div>
-      <h1 className="page-title">孩子档案</h1>
-      <p className="page-lead">每个孩子独立档案；点「管理」进入目标、任务与成长记录。</p>
+      <h1 className="page-title">{t("children.title")}</h1>
+      <p className="page-lead">{t("children.lead")}</p>
       {err && <p className="error">{err}</p>}
       <div className="card">
-        <h3>新增孩子</h3>
+        <h3>{t("children.add")}</h3>
         <div className="form-row">
-          <label>姓名</label>
+          <label>{t("children.name")}</label>
           <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
         </div>
         <div className="form-row">
-          <label>年级</label>
+          <label>{t("children.grade")}</label>
           <input value={form.grade} onChange={(e) => setForm((f) => ({ ...f, grade: e.target.value }))} />
         </div>
         <button type="button" onClick={add} disabled={!form.name || !form.grade}>
-          添加
+          {t("children.addBtn")}
         </button>
       </div>
 
       <div className="card">
-        <h3>列表</h3>
+        <h3>{t("children.list")}</h3>
         <table>
           <thead>
             <tr>
-              <th>姓名</th>
-              <th>年级</th>
+              <th>{t("children.name")}</th>
+              <th>{t("children.grade")}</th>
               <th />
             </tr>
           </thead>
@@ -86,7 +88,7 @@ export function ChildrenPage() {
                 <td>{c.name}</td>
                 <td>{c.grade}</td>
                 <td>
-                  <Link to={`/children/${c.childId}`}>管理</Link>
+                  <Link to={`/children/${c.childId}`}>{t("children.manage")}</Link>
                 </td>
               </tr>
             ))}
